@@ -18,7 +18,8 @@ public class PathGenerator {
             Map<Type, Integer> remainMap = fits(method.getArgTypes(), typeMap);
 
             if (remainMap != null) {
-                if (methodSet.size() == 1) {
+                if (nonPositive(remainMap)) {
+                    // Variable map has to be empty before return
                     if (method.getRetType().equals(retType)) {
                         // Successful
                         List<MethodSignature> sgList = new ArrayList<>();
@@ -33,6 +34,7 @@ public class PathGenerator {
                 Set<MethodSignature> copySet = new HashSet<>(methodSet);
                 copySet.remove(method);
                 try {
+                    remainMap.put(method.getRetType(), 1);
                     list.addAll(add(method, generate(copySet, remainMap)));
                 } catch (Error ignored) {}
             }
@@ -52,14 +54,21 @@ public class PathGenerator {
         for (Type type : argTypes) {
             if (map.containsKey(type)) {
                 int count = map.get(type);
-                if (count > 0) {
-                    // ok, decrement count
-                    map.put(type, count - 1);
-                } else {
-                    return null;
-                }
+                // ok, decrement count
+                map.put(type, count - 1);
+            }else{
+                return null;
             }
         }
         return map;
+    }
+
+    private boolean nonPositive(Map<Type, Integer> map){
+        for(int v : map.values()){
+            if(v>0){
+                return false;
+            }
+        }
+        return true;
     }
 }
