@@ -23,7 +23,7 @@ public class MethodSignature {
     private final boolean isConstructor;
     private final SootMethod method;
 
-    protected MethodSignature(String name, Type retType, List<Type> argTypes, boolean isStatic, SootClass hostClass, boolean isConstructor, SootMethod method){
+    public MethodSignature(String name, Type retType, List<Type> argTypes, boolean isStatic, SootClass hostClass, boolean isConstructor, SootMethod method){
         this.retType = retType;
         this.argTypes = argTypes;
         this.isStatic = isStatic;
@@ -73,7 +73,7 @@ public class MethodSignature {
             i += 1;
         }
         result += ")";
-        return name;
+        return result;
     }
 
     @Override
