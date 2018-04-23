@@ -18,16 +18,21 @@ public class PathGenerator {
             Map<Type, Integer> remainMap = fits(method.getArgTypes(), typeMap);
 
             if (remainMap != null) {
-                if (nonPositive(remainMap)) {
-                    // Variable map has to be empty before return
-                    if (method.getRetType().equals(retType)) {
-                        // Successful
-                        List<MethodSignature> sgList = new ArrayList<>();
-                        sgList.add(method);
-                        list.add(sgList);
-                        return list;
-                    } else {
-                        // Nothing there
+                if (methodSet.size() == 1){
+                    if(nonPositive(remainMap)){
+                        // Variable map has to be empty before return
+                        if (method.getRetType().equals(retType)) {
+                            // Successful
+                            List<MethodSignature> sgList = new ArrayList<>();
+                            sgList.add(method);
+                            list.add(sgList);
+                            return list;
+                        } else {
+                            // Nothing there
+                            throw new IllegalArgumentException();
+                        }
+                    }else{
+                        // Not all variables are used, abort
                         throw new IllegalArgumentException();
                     }
                 }
