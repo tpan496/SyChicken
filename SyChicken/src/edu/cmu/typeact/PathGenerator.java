@@ -8,12 +8,11 @@ import java.util.*;
 public class PathGenerator {
 
     private String retType;
-    private Map<String, List<String>> polyMap;
+    private Map<String, Set<String>> polyMap;
 
-    public PathGenerator(Set<MethodSignature> methodSet, Map<String, Integer> typeMap, String retType, Map<String, List<String>> polyMap) {
+    public PathGenerator(String retType, Map<String, Set<String>> polyMap) {
         this.retType = retType;
         this.polyMap = polyMap;
-        //generate(methodSet, typeMap);
     }
 
     /**
@@ -22,7 +21,7 @@ public class PathGenerator {
      * @param typeMap mapping from variable to its count
      * @return lists of viable combinations
      */
-    List<List<MethodSignature>> generate(Set<MethodSignature> methodSet, Map<String, Integer> typeMap) {
+    public List<List<MethodSignature>> generate(Set<MethodSignature> methodSet, Map<String, Integer> typeMap) {
         List<List<MethodSignature>> list = new LinkedList<>();
         for (MethodSignature method : methodSet) {
             // Check if the argtypes are viable
@@ -98,12 +97,8 @@ public class PathGenerator {
 
     // Checks if b is super class of a
     private boolean isSuper(String b, String a){
-        for(String typeA : polyMap.get(a)){
-            if(typeA.equals(b)){
-                return true;
-            }
-        }
-        return false;
+        if (polyMap.get(a) == null) return false;
+        return polyMap.get(a).contains(b);
     }
 
     // If required argument input types are superclasses, then it should also work
