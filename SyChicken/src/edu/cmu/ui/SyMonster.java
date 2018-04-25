@@ -103,6 +103,7 @@ public class SyMonster {
                 if(allseq.size()>0){
                     System.out.println("all seq: "+allseq);
                     System.out.println(set.size());
+                    break;
                 }
             }
         }

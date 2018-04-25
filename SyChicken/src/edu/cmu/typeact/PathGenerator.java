@@ -58,7 +58,7 @@ public class PathGenerator {
 
             if (remainMap != null) {
                 if (methodSet.size() == 1) {
-                    //if (nonPositive(remainMap)) {
+                    if (nonPositive(remainMap)) {
                         // Variable map has to be empty before return
                         if (method.getRetType().toString().equals(retType) || typeMap.containsKey(retType) && typeMap.get(retType) > 0) {
                             // Successful
@@ -71,10 +71,11 @@ public class PathGenerator {
                             list.add(new LinkedList<>());
                             return list;
                         }
-                    //} else {
-                        // Not all variables are used, abort
-                    //    return new LinkedList<>();
-                    //}
+                    } else {
+                        // Nothing there
+                        list.add(new LinkedList<>());
+                        return list;
+                    }
                 }
                 Set<MethodSignature> copySet = new HashSet<>(methodSet);
                 copySet.remove(method);
