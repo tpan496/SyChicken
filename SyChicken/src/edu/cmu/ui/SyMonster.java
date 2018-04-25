@@ -98,10 +98,12 @@ public class SyMonster {
         while (true){
             Set<MethodSignature> set = tar.solve();
             if (set != null){
+                System.out.println("set: "+set);
                 List<List<MethodSignature>> allseq = generator.generate(set,new HashMap<>(inputCounts));
-                System.out.println(allseq);
-                System.out.println(set.size());
-
+                if(allseq.size()>0){
+                    System.out.println("all seq: "+allseq);
+                    System.out.println(set.size());
+                }
             }
         }
 
