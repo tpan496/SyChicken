@@ -3,27 +3,37 @@ package edu.cmu.parser;
 import soot.Type;
 import java.util.*;
 
+
 public class PathGenerator {
 
-    private Type retType;
+    private String retType;
+    private Map<String, List<String>> polyMap;
 
-    public PathGenerator(Map<Type, Integer> typeMap, Type retType, Set<MethodSignature> methodSet) {
+    public PathGenerator(Set<MethodSignature> methodSet, Map<String, Integer> typeMap, String retType, Map<String, List<String>> polyMap) {
         this.retType = retType;
+        this.polyMap = polyMap;
+        //generate(methodSet, typeMap);
     }
 
-    List<List<MethodSignature>> generate(Set<MethodSignature> methodSet, Map<Type, Integer> typeMap) {
-        List<List<MethodSignature>> list = new ArrayList<>();
+    /**
+     * Generates possible combinations of methods that will give out the wanted return type
+     * @param methodSet initial method set
+     * @param typeMap mapping from variable to its count
+     * @return lists of viable combinations
+     */
+    List<List<MethodSignature>> generate(Set<MethodSignature> methodSet, Map<String, Integer> typeMap) {
+        List<List<MethodSignature>> list = new LinkedList<>();
         for (MethodSignature method : methodSet) {
             // Check if the argtypes are viable
-            Map<Type, Integer> remainMap = fits(method.getArgTypes(), typeMap);
+            Map<String, Integer> remainMap = fits(method.getArgTypes(), typeMap);
 
             if (remainMap != null) {
                 if (methodSet.size() == 1){
                     if(nonPositive(remainMap)){
                         // Variable map has to be empty before return
-                        if (method.getRetType().equals(retType)) {
+                        if (method.getRetType().toString().equals(retType)) {
                             // Successful
-                            List<MethodSignature> sgList = new ArrayList<>();
+                            List<MethodSignature> sgList = new LinkedList<>();
                             sgList.add(method);
                             list.add(sgList);
                             return list;
@@ -39,7 +49,15 @@ public class PathGenerator {
                 Set<MethodSignature> copySet = new HashSet<>(methodSet);
                 copySet.remove(method);
                 try {
-                    remainMap.put(method.getRetType(), 1);
+                    remainMap.put(method.getRetType().toString(), 1);
+
+                    // check if method is static
+                    if(method.getIsStatic()){
+                        // do nothing
+                    }else{
+                        // add method class type to map as variable, since it is being invoked
+                        remainMap.put(method.getHostClass().getType().toString(), 1);
+                    }
                     list.addAll(add(method, generate(copySet, remainMap)));
                 } catch (Error ignored) {}
             }
@@ -54,13 +72,13 @@ public class PathGenerator {
         return lists;
     }
 
-    private Map<Type, Integer> fits(List<Type> argTypes, Map<Type, Integer> inMap) {
-        Map<Type, Integer> map = new HashMap<>(inMap);
+    private Map<String, Integer> fits(List<Type> argTypes, Map<String, Integer> inMap) {
+        Map<String, Integer> map = new HashMap<>(inMap);
         for (Type type : argTypes) {
-            if (map.containsKey(type)) {
-                int count = map.get(type);
+            if (polyContain(type.toString(), inMap)) {
+                int count = map.get(type.toString());
                 // ok, decrement count
-                map.put(type, count - 1);
+                map.put(type.toString(), count - 1);
             }else{
                 return null;
             }
@@ -68,12 +86,32 @@ public class PathGenerator {
         return map;
     }
 
-    private boolean nonPositive(Map<Type, Integer> map){
+    private boolean nonPositive(Map<String, Integer> map){
         for(int v : map.values()){
             if(v>0){
                 return false;
             }
         }
         return true;
+    }
+
+    // Checks if b is super class of a
+    private boolean isSuper(String b, String a){
+        for(String typeA : polyMap.get(a)){
+            if(typeA.equals(b)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // If required argument input types are superclasses, then it should also work
+    private boolean polyContain(String type, Map<String ,Integer> inMap){
+        for(String key : inMap.keySet()){
+            if(isSuper(key, type) || key.equals(type)){
+                return true;
+            }
+        }
+        return false;
     }
 }
