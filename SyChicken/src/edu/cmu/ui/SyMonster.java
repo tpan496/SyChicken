@@ -3,17 +3,15 @@ import edu.cmu.codeformer.CodeFormer;
 import edu.cmu.compilation.Test;
 import edu.cmu.equivprogram.DependencyMap;
 import edu.cmu.parser.*;
-import edu.cmu.petrinet.*;
-import edu.cmu.reachability.*;
+import edu.cmu.typeact.PathGenerator;
 import edu.cmu.typeact.TypeActivationReachability;
 import edu.cmu.utils.TimerUtils;
 import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.TimeoutException;
-import soot.Scene;
-import soot.Type;
 import uniol.apt.adt.pn.PetriNet;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -93,15 +91,17 @@ public class SyMonster {
             if (inputCounts.containsKey(input)) inputCounts.put(input,inputCounts.get(input)+1);
             else inputCounts.put(input,1);
         }
-        TypeActivationReachability tar = new TypeActivationReachability(sigs,inputCounts,jsonInput.tgtType);
-        int loc = 1;
-		int paths = 0;
-		int programs = 0;
-		boolean solution = false;
-        while (true){
-            System.out.println(tar.solve());
-        }
+        System.out.println(sigs);
+        TypeActivationReachability tar = new TypeActivationReachability(sigs,inputCounts,jsonInput.tgtType,subclassMap);
+        //PathGenerator generator = new PathGenerator(inputCounts,retType,);
 
+        while (true){
+            Set<MethodSignature> set = tar.solve();
+            if (set != null){
+                System.out.println(set.size());
+
+            }
+        }
 
 	}
 

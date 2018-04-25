@@ -25,7 +25,7 @@ public class TypeActivationReachability {
     private final String retType;
     private int curlen = 1;
     private int sigmax;
-    public TypeActivationReachability(List<MethodSignature> sigs, Map<String,Integer> inputCounts,String retType) throws TimeoutException {
+    public TypeActivationReachability(List<MethodSignature> sigs, Map<String,Integer> inputCounts,String retType,Map<String,Set<String>> subtosuper) throws TimeoutException {
         this.inputCounts = inputCounts;
         this.retType= retType;
         Set<String> types = new HashSet<>();
@@ -38,7 +38,17 @@ public class TypeActivationReachability {
             types.add(met.output);
             curid += 1;
         }
+
         sigmax = curid;
+        for (String sub : subtosuper.keySet()){
+            Set<String> sups = subtosuper.get(sub);
+            for (String sup : sups){
+                sigtoint.put(new Met(sub,sup),curid);
+                types.add(sup);
+                curid += 1;
+            }
+            types.add(sub);
+        }
         for (String type : types){
             if (type != null){
                 typetoint.put(type,curid);
@@ -46,6 +56,8 @@ public class TypeActivationReachability {
                 curid += 1;
             }
         }
+
+
         try {
             allConstraints(curlen);
         } catch (ContradictionException e) {

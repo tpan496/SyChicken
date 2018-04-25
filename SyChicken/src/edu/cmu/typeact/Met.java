@@ -28,6 +28,11 @@ public class Met {
         if (inputs.contains(output)){output = null;}
     }
 
+    protected Met(String sub,String sup){
+        inputs.add(sub);
+        output = sup;
+    }
+
     protected Met(String input1, String input2, String output){
         inputs.add(input1);
         inputs.add(input2);

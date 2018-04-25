@@ -1,5 +1,6 @@
-package edu.cmu.parser;
+package edu.cmu.typeact;
 
+import edu.cmu.parser.MethodSignature;
 import soot.Type;
 import java.util.*;
 
