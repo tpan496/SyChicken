@@ -13,6 +13,9 @@ import soot.Type;
 
 import java.util.*;
 
+/**
+ * This class provide the reachability analysis with the type activation model.
+ */
 public class TypeActivationReachability {
     private ISolver solver = SolverFactory.newDefault();
     private Map<Met,Integer> sigtoint = new HashMap<>();
@@ -30,6 +33,7 @@ public class TypeActivationReachability {
         this.retType= retType;
         Set<String> types = new HashSet<>();
         solver.setTimeout(100000);
+        //Setting up variables for signatures
         for (MethodSignature sig : sigs){
             Met met = new Met(sig);
             sigtoint.put(met,curid);
@@ -40,6 +44,7 @@ public class TypeActivationReachability {
         }
 
         sigmax = curid;
+        //Additional transitions for polymorphism
         for (String sub : subtosuper.keySet()){
             Set<String> sups = subtosuper.get(sub);
             for (String sup : sups){
@@ -57,34 +62,6 @@ public class TypeActivationReachability {
             }
         }
 
-
-        try {
-            allConstraints(curlen);
-        } catch (ContradictionException e) {
-        }
-    }
-
-
-    public TypeActivationReachability(List<Met> sigs, Map<String,Integer> inputCounts,String retType,boolean k) throws TimeoutException {
-        this.inputCounts = inputCounts;
-        this.retType= retType;
-        Set<String> types = new HashSet<>();
-        solver.setTimeout(100000);
-        for (Met sig : sigs){
-            sigtoint.put(sig,curid);
-            inttosig.put(curid,null);
-            types.addAll(sig.inputs);
-            types.add(sig.output);
-            curid += 1;
-        }
-        sigmax = curid;
-        for (String type : types){
-            if (type != null){
-                typetoint.put(type,curid);
-                inttotype.put(curid,type);
-                curid += 1;
-            }
-        }
         try {
             allConstraints(curlen);
         } catch (ContradictionException e) {
@@ -108,6 +85,7 @@ public class TypeActivationReachability {
             satResult = solver.model();
         }
         else{
+            //Increasing path length
             curlen += 1;
             if (curlen > sigtoint.size()) return null;
             System.out.println("Increasing length to "+curlen);
@@ -122,6 +100,7 @@ public class TypeActivationReachability {
         VecInt block = new VecInt();
         for (Integer id : satResult){
             if (id > 0 && id < sigmax) {
+                //Block the previous solution
                 block.push(-id);
                 result.add(inttosig.get(id));
             }
@@ -129,7 +108,6 @@ public class TypeActivationReachability {
         try {
             solver.addClause(block);
         } catch (ContradictionException e) {
-
         }
         return result;
     }
@@ -263,9 +241,7 @@ public class TypeActivationReachability {
         }
     }
 
-
-
-
+    //Encoding a -> b = c
     private void implies(int a, int b, int c) throws ContradictionException {
         VecInt vec1 = new VecInt();
         vec1.push(-a);
@@ -282,7 +258,7 @@ public class TypeActivationReachability {
         solver.addAtMost(vec3,1);
     }
 
-
+    //Encoding and_{x in xs}x = c
     private void and(List<Integer> xs,int c) throws ContradictionException {
         VecInt vec1 = new VecInt();
         for (int x : xs){
@@ -295,7 +271,8 @@ public class TypeActivationReachability {
         vec1.push(-c);
         solver.addAtMost(vec1,2);
     }
-
+    
+    //Encoding or_{x in xs}x = c
     private void or(List<Integer> xs,int c) throws ContradictionException {
         VecInt vec1 = new VecInt();
         for (int x : xs){
@@ -308,7 +285,4 @@ public class TypeActivationReachability {
         vec1.push(-c);
         solver.addAtLeast(vec1,1);
     }
-
-
-
 }
