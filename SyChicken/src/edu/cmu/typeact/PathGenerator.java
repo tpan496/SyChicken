@@ -4,7 +4,9 @@ import edu.cmu.parser.MethodSignature;
 import soot.JastAddJ.Signatures;
 import soot.Type;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 
 public class PathGenerator {
@@ -25,7 +27,7 @@ public class PathGenerator {
      * @return lists of viable combinations
      */
     public List<List<MethodSignature>> generate(Set<MethodSignature> methodSet, Map<String, Integer> typeMap) {
-        //System.out.println("want type: "+retType);
+        System.out.println("want type: "+retType);
         //System.out.println("poly map: " + polyMap);
         int totalCount = methodSet.size();
         List<List<MethodSignature>> lists = generateHelper(methodSet, typeMap, 0);
@@ -37,6 +39,7 @@ public class PathGenerator {
                 emptyList.add(list);
             }
         }
+
         //System.out.println("==== end ===");
         return emptyList;
     }
@@ -48,7 +51,6 @@ public class PathGenerator {
             Map<String, Integer> remainMap = fits(method, typeMap);
 
             /*if(level == 0) {
-                System.out.println("level: " + level);
                 System.out.println("current methodSet: " + methodSet);
                 System.out.println("current method: " + method);
                 System.out.println("current typeMap: " + typeMap);
@@ -60,7 +62,7 @@ public class PathGenerator {
                 if (methodSet.size() == 1) {
                     if (nonPositive(remainMap)) {
                         // Variable map has to be empty before return
-                        if (method.getRetType().toString().equals(retType) || typeMap.containsKey(retType) && typeMap.get(retType) > 0) {
+                        if (method.getRetType().toString().equals(retType) || typeMap.containsKey(retType)) {
                             // Successful
                             List<MethodSignature> sgList = new LinkedList<>();
                             sgList.add(method);
@@ -80,6 +82,7 @@ public class PathGenerator {
                 Set<MethodSignature> copySet = new HashSet<>(methodSet);
                 copySet.remove(method);
 
+                Map<String, Integer> copyRemainMap = new HashMap<>(remainMap);
                 // check if method is static
                 if (method.getIsStatic()) {
                     // do nothing
@@ -87,17 +90,17 @@ public class PathGenerator {
 
                     // add method return type to map as variable, since it is being created
                     String type = method.getRetType().toString();
-                    if(remainMap.containsKey(type)){
-                        if(remainMap.get(type) > 0) {
-                            remainMap.put(type, remainMap.get(type) + 1);
+                    if(copyRemainMap.containsKey(type)){
+                        if(copyRemainMap.get(type) > 0) {
+                            copyRemainMap.put(type, copyRemainMap.get(type) + 1);
                         }else{
-                            remainMap.put(type, 1);
+                            copyRemainMap.put(type, 1);
                         }
                     }else {
-                        remainMap.put(type, 1);
+                        copyRemainMap.put(type, 1);
                     }
                 }
-                list.addAll(add(method, generateHelper(copySet, remainMap, level+1)));
+                list.addAll(add(method, generateHelper(copySet, copyRemainMap, level+1)));
             }
         }
         return list;
