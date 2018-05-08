@@ -23,6 +23,7 @@ public class TypeActivationReachability {
 
     private Map<String,Integer> typetoint = new HashMap<>();
     private Map<Integer,String> inttotype = new HashMap<>();
+    private Map<Integer,Met> inttosigtest = new HashMap<>();
     private int curid = 1;
     private final Map<String,Integer> inputCounts;
     private final String retType;
@@ -37,6 +38,7 @@ public class TypeActivationReachability {
         for (MethodSignature sig : sigs){
             Met met = new Met(sig);
             sigtoint.put(met,curid);
+            inttosigtest.put(curid,met);
             inttosig.put(curid,sig);
             types.addAll(met.inputs);
             types.add(met.output);
@@ -75,6 +77,10 @@ public class TypeActivationReachability {
         finalReq();
         degreeConstr();
         lengthConstr(len);
+        hardcodeString("getBounds2D");
+        hardcodeString("createTransformedArea");
+        hardcodeString("getScaleInstance");
+        excludeString("outcode");
     }
 
 
@@ -97,12 +103,14 @@ public class TypeActivationReachability {
             return null;
         }
         Set<MethodSignature> result = new HashSet<>();
+        //List<Met> testresult = new LinkedList<>();
         VecInt block = new VecInt();
         for (Integer id : satResult){
             if (id > 0 && id < sigmax) {
                 //Block the previous solution
                 block.push(-id);
                 result.add(inttosig.get(id));
+                //testresult.add(inttosigtest.get(id));
             }
         }
         try {
@@ -130,7 +138,8 @@ public class TypeActivationReachability {
                 if (tmpmap.containsKey(type)){
                     List<Integer> boollist = new LinkedList<>();
                     for (Met sig : tmpmap.get(type)){
-                        boollist.add(sigtoint.get(sig));
+                        if (!sig.inputs.contains(sig.output))
+                            boollist.add(sigtoint.get(sig));
                     }
                     or(boollist,curid);
                     VecInt vec = new VecInt();
@@ -194,14 +203,14 @@ public class TypeActivationReachability {
     }
 
     private void degreeConstr() throws ContradictionException {
-        Map<String,List<Met>> retmap = new HashMap<>();
-        Map<String,List<Met>> inmap = new HashMap<>();
+        Map<String,Set<Met>> retmap = new HashMap<>();
+        Map<String,Set<Met>> inmap = new HashMap<>();
         for (Met sig : sigtoint.keySet()){
             if (retmap.containsKey(sig.output)){
                 retmap.get(sig.output).add(sig);
             }
             else{
-                List<Met> newlist = new LinkedList<>();
+                Set<Met> newlist = new HashSet<>();
                 newlist.add(sig);
                 retmap.put(sig.output,newlist);
             }
@@ -211,7 +220,7 @@ public class TypeActivationReachability {
                     inmap.get(argtype).add(sig);
                 }
                 else{
-                    List<Met> newlist = new LinkedList<>();
+                    Set<Met> newlist = new HashSet<>();
                     newlist.add(sig);
                     inmap.put(argtype,newlist);
                 }
@@ -220,26 +229,28 @@ public class TypeActivationReachability {
 
         for (String type : typetoint.keySet()){
             int additional = 0;
-            if (type.equals("void")){
-                continue;
+            if (inputCounts.containsKey(type)){
+                additional += inputCounts.get(type);
             }
-            else if (inputCounts.containsKey(type)){
-                additional = inputCounts.get(type);
-            }
-            else if (type.equals(retType)){
-                additional = -1;
+            if (type.equals(retType)){
+                additional -= 1;
             }
             VecInt vec = new VecInt();
             int indegree = 0;
             if (retmap.containsKey(type)){
-                indegree = retmap.get(type).size();
                 for (Met sig : retmap.get(type)){
                     vec.push(-sigtoint.get(sig));
+                    indegree += 1;
                 }
             }
             if (inmap.containsKey(type)) {
                 for (Met sig: inmap.get(type)){
-                    vec.push(sigtoint.get(sig));
+                    int typecount = 0;
+                    for (String inputtype : sig.inputs){
+                        if (inputtype.equals(type)) typecount += 1;
+                    }
+                    VecInt split = splitVar(sigtoint.get(sig),typecount);
+                    vec.pushAll(split);
                 }
             }
             solver.addAtLeast(vec,indegree+additional);
@@ -289,5 +300,53 @@ public class TypeActivationReachability {
         }
         vec1.push(-c);
         solver.addAtLeast(vec1,1);
+    }
+
+    private void hardcodeString(String string) throws ContradictionException {
+        VecInt vec = new VecInt();
+        for (Met met: sigtoint.keySet()){
+            if (met.name.contains(string)){
+                vec.push(sigtoint.get(met));
+            }
+        }
+        solver.addAtLeast(vec,1);
+    }
+
+    private void excludeString(String string) throws ContradictionException {
+        VecInt vec = new VecInt();
+        for (Met met: sigtoint.keySet()){
+            if (met.name.contains(string)){
+                vec.push(sigtoint.get(met));
+            }
+        }
+        solver.addAtMost(vec,0);
+    }
+
+    private void calcDegree(List<Met> methods) {
+        Map<String,Integer> incount = new HashMap<>();
+        Map<String,Integer> outcount = new HashMap<>();
+        for (Met met : methods){
+            for (String input: met.inputs){
+                if (incount.containsKey(input)) incount.put(input,incount.get(input)+1);
+                else incount.put(input,1);
+            }
+            if (outcount.containsKey(met.output)) outcount.put(met.output,outcount.get(met.output)+1);
+            else outcount.put(met.output,1);
+        }
+        System.out.println("outdegree:" + incount);
+        System.out.println("indegree" + outcount);
+    }
+
+    private VecInt splitVar(int var, int numbersplit) throws ContradictionException {
+        VecInt result = new VecInt();
+        for (int i = 0; i < numbersplit; i += 1){
+            VecInt vec = new VecInt();
+            vec.push(curid);
+            vec.push(-var);
+            result.push(curid);
+            solver.addExactly(vec,1);
+            curid += 1;
+        }
+        return result;
     }
 }

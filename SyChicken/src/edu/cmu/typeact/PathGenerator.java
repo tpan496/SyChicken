@@ -27,19 +27,14 @@ public class PathGenerator {
      * @return lists of viable combinations
      */
     public List<List<MethodSignature>> generate(Set<MethodSignature> methodSet, Map<String, Integer> typeMap) {
-        //System.out.println("poly map: " + polyMap);
         int totalCount = methodSet.size();
         List<List<MethodSignature>> lists = generateHelper(methodSet, typeMap, 0);
         List<List<MethodSignature>> emptyList = new LinkedList<>();
-        //System.out.println("==== results ====");
         for(List list : lists){
             if(list.size() == totalCount){
-                //System.out.println(list);
                 emptyList.add(list);
             }
         }
-
-        //System.out.println("==== end ===");
         return emptyList;
     }
 
@@ -48,14 +43,6 @@ public class PathGenerator {
         for (MethodSignature method : methodSet) {
             // Check if the argtypes are viable
             Map<String, Integer> remainMap = fits(method, typeMap);
-
-            /*if(level == 0) {
-                System.out.println("current methodSet: " + methodSet);
-                System.out.println("current method: " + method);
-                System.out.println("current typeMap: " + typeMap);
-                System.out.println("current remainMap: " + remainMap);
-                System.out.println("===============================");
-            }*/
 
             if (remainMap != null) {
                 if (methodSet.size() == 1) {
@@ -149,10 +136,7 @@ public class PathGenerator {
     // If required argument input types are superclasses, then it should also work
     private String polyContain(String type, Map<String, Integer> inMap) {
         for (String key : inMap.keySet()) {
-            System.out.println(key+","+type);
-            System.out.println("poly: "+polyMap.get(key));
             if (isSuper(type,key) || key.equals(type)) {
-                System.out.println("yes: "+key+","+type);
                 return key;
             }
         }

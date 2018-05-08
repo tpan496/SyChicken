@@ -6,7 +6,9 @@ import java.util.*;
 public class Met {
     public List<String> inputs = new ArrayList<>();
     public String output = "";
+    public String name;
     protected Met(MethodSignature met){
+        name = met.toString();
         if (met.getIsConstructor()){
             for (Type type : met.getArgTypes()){
                 inputs.add(type.toString());
@@ -28,6 +30,7 @@ public class Met {
     }
 
     protected Met(String sub,String sup){
+        name = "poly("+sub+","+sup+")";
         inputs.add(sub);
         output = sup;
     }
