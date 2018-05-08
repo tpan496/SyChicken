@@ -1,0 +1,13 @@
+Options:
+Programs explored = 1
+Sets explored = 1
+Paths explored = 1
+code:
+public java.util.Vector coordinates(cmu.symonster.Triangle sypet_arg0) throws Throwable{
+java.util.Vector var_0 = sypet_arg0.getCoordinates();
+return var_0;
+}
+Soot time: 0.772
+Equivalent program preprocess time: 0.008
+Form code time: 0.001
+Compilation time: 0.453

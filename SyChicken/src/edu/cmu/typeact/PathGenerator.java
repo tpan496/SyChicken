@@ -61,7 +61,7 @@ public class PathGenerator {
                 if (methodSet.size() == 1) {
                     if (nonPositive(remainMap)) {
                         // Variable map has to be empty before return
-                        if (method.getRetType().toString().equals(retType) || typeMap.containsKey(retType)) {
+                        if (method.getRetType().toString().equals(retType) || isSuper(retType, method.getRetType().toString()) || polyContain(retType, typeMap)!=null) {
                             // Successful
                             List<MethodSignature> sgList = new LinkedList<>();
                             sgList.add(method);
@@ -119,10 +119,11 @@ public class PathGenerator {
         }
         Map<String, Integer> map = new HashMap<>(inMap);
         for (Type type : argTypes) {
-            if (polyContain(type.toString(), inMap)) {
-                int count = map.get(type.toString());
+            String res = polyContain(type.toString(), inMap);
+            if (res != null) {
+                int count = map.get(res);
                 // ok, decrement count
-                map.put(type.toString(), count - 1);
+                map.put(res, count - 1);
             } else {
                 return null;
             }
@@ -146,12 +147,15 @@ public class PathGenerator {
     }
 
     // If required argument input types are superclasses, then it should also work
-    private boolean polyContain(String type, Map<String, Integer> inMap) {
+    private String polyContain(String type, Map<String, Integer> inMap) {
         for (String key : inMap.keySet()) {
-            if (isSuper(key, type) || key.equals(type)) {
-                return true;
+            System.out.println(key+","+type);
+            System.out.println("poly: "+polyMap.get(key));
+            if (isSuper(type,key) || key.equals(type)) {
+                System.out.println("yes: "+key+","+type);
+                return key;
             }
         }
-        return false;
+        return null;
     }
 }
