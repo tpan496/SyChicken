@@ -25,7 +25,6 @@ public class Met {
                 output = met.getRetType().toString();
             }
         }
-        if (inputs.contains(output)){output = null;}
     }
 
     protected Met(String sub,String sup){
@@ -33,9 +32,4 @@ public class Met {
         output = sup;
     }
 
-    protected Met(String input1, String input2, String output){
-        inputs.add(input1);
-        inputs.add(input2);
-        this.output = output;
-    }
 }

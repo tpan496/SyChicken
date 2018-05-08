@@ -1,0 +1,18 @@
+{
+  "id": 10,
+  "methodName": "fake",
+  "paramNames": [
+    "sypet_arg0"
+  ],
+  "srcTypes": [
+    "cmu.symonster.Triangle"
+  ],
+  "tgtType": "cmu.symonster.Shape",
+  "packages": [
+    "cmu.symonster"
+  ],
+  "libs": [
+    "../lib/point.jar"
+  ],
+  "testPath": "benchmarks/tests/11/TestSource.java"
+}

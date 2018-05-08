@@ -132,7 +132,12 @@ public class TypeActivationReachability {
                     for (Met sig : tmpmap.get(type)){
                         boollist.add(sigtoint.get(sig));
                     }
-                    or(boollist,typetoint.get(type));
+                    or(boollist,curid);
+                    VecInt vec = new VecInt();
+                    vec.push(-curid);
+                    vec.push(typetoint.get(type));
+                    solver.addAtLeast(vec,1);
+                    curid += 1;
                 }
                 else{
                     VecInt vec = new VecInt();
@@ -262,16 +267,16 @@ public class TypeActivationReachability {
     private void and(List<Integer> xs,int c) throws ContradictionException {
         VecInt vec1 = new VecInt();
         for (int x : xs){
-            vec1.push(x);
+            vec1.push(-x);
             VecInt vecsub = new VecInt();
             vecsub.push(c);
             vecsub.push(-x);
             solver.addAtMost(vecsub,1);
         }
-        vec1.push(-c);
-        solver.addAtMost(vec1,2);
+        vec1.push(c);
+        solver.addAtLeast(vec1,1);
     }
-    
+
     //Encoding or_{x in xs}x = c
     private void or(List<Integer> xs,int c) throws ContradictionException {
         VecInt vec1 = new VecInt();

@@ -27,7 +27,6 @@ public class PathGenerator {
      * @return lists of viable combinations
      */
     public List<List<MethodSignature>> generate(Set<MethodSignature> methodSet, Map<String, Integer> typeMap) {
-        System.out.println("want type: "+retType);
         //System.out.println("poly map: " + polyMap);
         int totalCount = methodSet.size();
         List<List<MethodSignature>> lists = generateHelper(methodSet, typeMap, 0);
