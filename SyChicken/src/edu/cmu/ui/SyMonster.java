@@ -25,7 +25,7 @@ public class SyMonster {
         SyMonsterInput jsonInput;
         if (args.length == 0) {
             System.out.println("Please use the program args next time.");
-            jsonInput = JsonParser.parseJsonInput("benchmarks/geometry/10/benchmark10.json");
+            jsonInput = JsonParser.parseJsonInput("benchmarks/geometry/15/benchmark15.json");
             File outfile = new File("benchmarks/thing.txt");
             out = new BufferedWriter(new FileWriter(outfile));
         }
@@ -106,8 +106,7 @@ public class SyMonster {
 
                 List<List<MethodSignature>> allseq = generator.generate(set,new HashMap<>(inputCounts));
                 System.out.println(allseq);
-                if(true)
-                    return;
+
                 sets += 1;
                 paths += allseq.size();
                 for (List<MethodSignature> signatures : allseq){

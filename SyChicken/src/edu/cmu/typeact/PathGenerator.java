@@ -43,12 +43,12 @@ public class PathGenerator {
         for (MethodSignature method : methodSet) {
             // Check if the argtypes are viable
             Map<String, Integer> remainMap = fits(method, typeMap);
-
+    /*
                 System.out.println("=="+"level: "+level+"=======");
                 System.out.println("method: "+method);
                 System.out.println("in map: "+typeMap);
                 System.out.println("out map: "+remainMap);
-                System.out.println("===================");
+                System.out.println("===================");*/
 
 
             if (remainMap != null) {
@@ -111,7 +111,7 @@ public class PathGenerator {
             argTypes.add(method.getHostClass().getType());
         }
         Map<String, Integer> map = new HashMap<>(inMap);
-        System.out.println("want: "+argTypes);
+        //System.out.println("want: "+argTypes);
         for (Type type : argTypes) {
             String res = polyContain(type.toString(), inMap);
             if (res != null) {
@@ -143,12 +143,12 @@ public class PathGenerator {
     // If required argument input types are superclasses, then it should also work
     private String polyContain(String type, Map<String, Integer> inMap) {
         for (String key : inMap.keySet()) {
-            System.out.println(key+","+type);
+            //System.out.println(key+","+type);
             if (isSuper(type,key) || key.equals(type)) {
-                System.out.println("equals");
+                //System.out.println("equals");
                 return key;
             }
-            System.out.println("not equals");
+            //System.out.println("not equals");
         }
         return null;
     }
