@@ -1,0 +1,17 @@
+Options:
+Programs explored = 7
+Sets explored = 20
+Paths explored = 20
+code:
+public java.awt.geom.Rectangle2D scale(java.awt.geom.Rectangle2D sypet_arg0, double sypet_arg1, double sypet_arg2) throws Throwable{
+java.awt.geom.AffineTransform var_0 = java.awt.geom.AffineTransform.getScaleInstance(sypet_arg1,sypet_arg2);
+java.awt.geom.AffineTransform var_1 =  new java.awt.geom.AffineTransform();
+java.awt.Shape var_2 = var_0.createTransformedShape(sypet_arg0);
+var_1.setTransform(var_1);
+java.awt.geom.Rectangle2D var_3 = var_2.getBounds2D();
+return var_3;
+}
+Soot time: 10.106
+Equivalent program preprocess time: 0.156
+Form code time: 0.005
+Compilation time: 0.779

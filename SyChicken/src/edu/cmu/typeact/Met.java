@@ -35,4 +35,8 @@ public class Met {
         output = sup;
     }
 
+    public String toString(){
+        return name;
+    }
+
 }

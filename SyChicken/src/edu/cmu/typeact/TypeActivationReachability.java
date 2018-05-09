@@ -78,7 +78,7 @@ public class TypeActivationReachability {
         degreeConstr();
         lengthConstr(len);
         hardcodeString("getBounds2D");
-        hardcodeString("createTransformedArea");
+        hardcodeString("createTransformedShape");
         hardcodeString("getScaleInstance");
         excludeString("outcode");
     }
@@ -103,16 +103,17 @@ public class TypeActivationReachability {
             return null;
         }
         Set<MethodSignature> result = new HashSet<>();
-        //List<Met> testresult = new LinkedList<>();
+        List<Met> testresult = new LinkedList<>();
         VecInt block = new VecInt();
         for (Integer id : satResult){
             if (id > 0 && id < sigmax) {
                 //Block the previous solution
                 block.push(-id);
                 result.add(inttosig.get(id));
-                //testresult.add(inttosigtest.get(id));
+                testresult.add(inttosigtest.get(id));
             }
         }
+        System.out.println(testresult);
         try {
             solver.addClause(block);
         } catch (ContradictionException e) {
@@ -143,8 +144,8 @@ public class TypeActivationReachability {
                     }
                     or(boollist,curid);
                     VecInt vec = new VecInt();
-                    vec.push(-curid);
-                    vec.push(typetoint.get(type));
+                    vec.push(curid);
+                    vec.push(-typetoint.get(type));
                     solver.addAtLeast(vec,1);
                     curid += 1;
                 }

@@ -4,12 +4,11 @@ import java.awt.geom.Rectangle2D;
 
 public class Solution {
 
-    public static Rectangle2D scale(Rectangle2D arg0, double arg1, double arg2) {
-        Area v1 = new Area(arg0);
-        AffineTransform v2 = AffineTransform.getScaleInstance(arg1, arg2);
-        Area v3 = v1.createTransformedArea(v2);
-        Rectangle2D v4 = v3.getBounds2D();
-        return v4;
+    public java.awt.geom.Rectangle2D scale(java.awt.geom.Rectangle2D sypet_arg0, double sypet_arg1, double sypet_arg2) throws Throwable{
+        java.awt.geom.AffineTransform var_0 = java.awt.geom.AffineTransform.getScaleInstance(sypet_arg1,sypet_arg2);
+        java.awt.Shape var_1 = var_0.createTransformedShape(sypet_arg0);
+        java.awt.geom.Rectangle2D var_2 = var_1.getBounds2D();
+        return var_2;
     }
 
 }
