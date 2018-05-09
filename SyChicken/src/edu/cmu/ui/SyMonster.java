@@ -93,6 +93,7 @@ public class SyMonster {
         TypeActivationReachability tar = new TypeActivationReachability(sigs,inputCounts,jsonInput.tgtType,superclassMap);
         PathGenerator generator = new PathGenerator(retType,superclassMap);
         System.out.println("super!: "+ superclassMap);
+        System.out.println("input counts: "+inputCounts);
 
         int programs = 0;
         int sets = 0;
@@ -105,6 +106,8 @@ public class SyMonster {
 
                 List<List<MethodSignature>> allseq = generator.generate(set,new HashMap<>(inputCounts));
                 System.out.println(allseq);
+                if(true)
+                    return;
                 sets += 1;
                 paths += allseq.size();
                 for (List<MethodSignature> signatures : allseq){
