@@ -1,0 +1,18 @@
+Options:
+Programs explored = 662
+Sets explored = 1005
+Valid Sets explored = 203
+Paths explored = 351
+code:
+public org.apache.commons.math3.linear.RealMatrix invert(org.apache.commons.math3.linear.RealMatrix sypet_arg0) throws Throwable{
+org.apache.commons.math3.linear.SingularValueDecomposition var_0 =  new org.apache.commons.math3.linear.SingularValueDecomposition(sypet_arg0);
+org.apache.commons.math3.linear.DecompositionSolver var_1 = var_0.getSolver();
+org.apache.commons.math3.linear.RealMatrix var_2 = var_1.getInverse();
+return var_2;
+}
+Soot time: 13.577
+Equivalent program preprocess time: 1.273
+Form code time: 0.08
+Set finding time: 16.742
+Compilation time: 17.578
+Constraint time: 0.067

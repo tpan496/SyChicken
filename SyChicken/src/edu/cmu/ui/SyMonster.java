@@ -11,9 +11,7 @@ import org.sat4j.specs.TimeoutException;
 import uniol.apt.adt.pn.PetriNet;
 
 import java.io.*;
-import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class SyMonster {
 	public static void main(String[] args) throws IOException, TimeoutException, ContradictionException {
@@ -25,7 +23,7 @@ public class SyMonster {
         SyMonsterInput jsonInput;
         if (args.length == 0) {
             System.out.println("Please use the program args next time.");
-            jsonInput = JsonParser.parseJsonInput("benchmarks/geometry/15/benchmark15.json");
+            jsonInput = JsonParser.parseJsonInput("benchmarks/math/1/benchmark1.json");
             File outfile = new File("benchmarks/thing.txt");
             out = new BufferedWriter(new FileWriter(outfile));
         }
@@ -59,11 +57,6 @@ public class SyMonster {
         String testCode = fileContents.toString();
         TimerUtils.startTimer("soot");
         List<MethodSignature> sigs = JarParser.parseJar(libs,jsonInput.packages,jsonConfig.blacklist);
-        List<MethodSignature> tmp = new ArrayList<>(sigs);
-        sigs = new LinkedList<>();
-        for (MethodSignature met : tmp){
-            if (!met.toString().contains("$")) sigs.add(met);
-        }
         Map<String,Set<String>> superclassMap = JarParser.getSuperClasses(acceptableSuperClasses);
         Map<String,Set<String>> subclassMap = new HashMap<>();
         for (String key : superclassMap.keySet()){
@@ -89,24 +82,35 @@ public class SyMonster {
             if (inputCounts.containsKey(input)) inputCounts.put(input,inputCounts.get(input)+1);
             else inputCounts.put(input,1);
         }
-        System.out.println(sigs);
-        TypeActivationReachability tar = new TypeActivationReachability(sigs,inputCounts,jsonInput.tgtType,superclassMap);
         PathGenerator generator = new PathGenerator(retType,superclassMap);
         System.out.println("super!: "+ superclassMap);
         System.out.println("input counts: "+inputCounts);
 
         int programs = 0;
         int sets = 0;
+        int validsets = 0;
         int paths = 0;
+
+        int curlen = 3;
+        TimerUtils.startTimer("constraints");
+        TypeActivationReachability tar = new TypeActivationReachability(sigs,inputCounts,jsonInput.tgtType,superclassMap,curlen);
+        TimerUtils.stopTimer("constraints");
         while (true){
+            TimerUtils.startTimer("set");
             Set<MethodSignature> set = tar.solve();
-            System.out.println("set:" + set);
-            if (set != null){
-                if (set.size() >= 7) break;
-
+            TimerUtils.stopTimer("set");
+            if (set == null){
+                curlen += 1;
+                System.out.println("Curlen: "+curlen);
+                TimerUtils.startTimer("constraints");
+                tar = new TypeActivationReachability(sigs,inputCounts,jsonInput.tgtType,superclassMap,curlen);
+                TimerUtils.stopTimer("constraints");
+            }
+            else{
                 List<List<MethodSignature>> allseq = generator.generate(set,new HashMap<>(inputCounts));
-                System.out.println(allseq);
-
+                if (allseq.size() > 0){
+                    validsets += 1;
+                }
                 sets += 1;
                 paths += allseq.size();
                 for (List<MethodSignature> signatures : allseq){
@@ -132,14 +136,17 @@ public class SyMonster {
                         if (compre) {
                             writeLog(out,"Options:\n");
                             writeLog(out,"Programs explored = " + programs+"\n");
-                            writeLog(out,"Sets explored = " + paths+"\n");
+                            writeLog(out,"Sets explored = " + sets+"\n");
+                            writeLog(out,"Valid Sets explored = " + validsets+"\n");
                             writeLog(out,"Paths explored = " + paths+"\n");
                             writeLog(out,"code:\n");
                             writeLog(out,code+"\n");
                             writeLog(out,"Soot time: "+TimerUtils.getCumulativeTime("soot")+"\n");
                             writeLog(out,"Equivalent program preprocess time: "+TimerUtils.getCumulativeTime("equiv")+"\n");
                             writeLog(out,"Form code time: "+TimerUtils.getCumulativeTime("code")+"\n");
+                            writeLog(out,"Set finding time: "+TimerUtils.getCumulativeTime("set")+"\n");
                             writeLog(out,"Compilation time: "+TimerUtils.getCumulativeTime("compile")+"\n");
+                            writeLog(out,"Constraint time: "+TimerUtils.getCumulativeTime("constraints")+"\n");
                             out.close();
 
                             File compfile = new File("build/Target.class");

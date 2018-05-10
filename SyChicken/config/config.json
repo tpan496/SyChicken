@@ -10,6 +10,7 @@
     "org.apache.commons.math.linear.SingularValueDecomposition"],
   "blacklist": ["hashCode",
     "add",
+    "setTransform",
     "toString",
     "DateTimeFormatterBuilder",
     "access$",
@@ -17,5 +18,7 @@
     "Iterator",
     "clinit",
     "contains",
-    "<clinit>"]
+    "<clinit>",
+    "Concatenate",
+    "concatenate"]
 }

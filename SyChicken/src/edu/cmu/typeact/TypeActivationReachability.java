@@ -27,9 +27,8 @@ public class TypeActivationReachability {
     private int curid = 1;
     private final Map<String,Integer> inputCounts;
     private final String retType;
-    private int curlen = 1;
     private int sigmax;
-    public TypeActivationReachability(List<MethodSignature> sigs, Map<String,Integer> inputCounts,String retType,Map<String,Set<String>> subtosuper) throws TimeoutException {
+    public TypeActivationReachability(List<MethodSignature> sigs, Map<String,Integer> inputCounts,String retType,Map<String,Set<String>> subtosuper,int curlen) throws TimeoutException {
         this.inputCounts = inputCounts;
         this.retType= retType;
         Set<String> types = new HashSet<>();
@@ -67,6 +66,7 @@ public class TypeActivationReachability {
         try {
             allConstraints(curlen);
         } catch (ContradictionException e) {
+            solver = null;
         }
     }
 
@@ -77,35 +77,23 @@ public class TypeActivationReachability {
         finalReq();
         degreeConstr();
         lengthConstr(len);
-        hardcodeString("getBounds2D");
-        hardcodeString("createTransformedShape");
-        hardcodeString("getScaleInstance");
-        excludeString("outcode");
     }
 
 
     public Set<MethodSignature> solve() throws TimeoutException {
         //Solve
+        if (solver == null) return null;
         int[] satResult = null;
         if (solver.isSatisfiable()){
             satResult = solver.model();
         }
         else{
-            //Increasing path length
-            curlen += 1;
-            if (curlen > sigtoint.size()) return null;
-            System.out.println("Increasing length to "+curlen);
-            try {
-                solver = SolverFactory.newDefault();
-                allConstraints(curlen);
-            } catch (ContradictionException e) {
-            }
             return null;
         }
         Set<MethodSignature> result = new HashSet<>();
         List<Met> testresult = new LinkedList<>();
         VecInt block = new VecInt();
-        for (Integer id : satResult){
+        for (Integer id : satResult) {
             if (id > 0 && id < sigmax) {
                 //Block the previous solution
                 block.push(-id);
@@ -113,7 +101,7 @@ public class TypeActivationReachability {
                 testresult.add(inttosigtest.get(id));
             }
         }
-        System.out.println(testresult);
+
         try {
             solver.addClause(block);
         } catch (ContradictionException e) {
@@ -197,8 +185,8 @@ public class TypeActivationReachability {
 
     private void lengthConstr(int len) throws ContradictionException {
         VecInt vec = new VecInt();
-        for (int val : sigtoint.values()){
-            vec.push(val);
+        for (Met met : sigtoint.keySet()){
+            vec.push(sigtoint.get(met));
         }
         solver.addExactly(vec,len);
     }
@@ -255,6 +243,7 @@ public class TypeActivationReachability {
                 }
             }
             solver.addAtLeast(vec,indegree+additional);
+            solver.addAtMost(vec,indegree+additional+2);
         }
     }
 
@@ -338,15 +327,24 @@ public class TypeActivationReachability {
         System.out.println("indegree" + outcount);
     }
 
+    private HashMap<Integer,List<Integer>> splitmap = new HashMap<>();
     private VecInt splitVar(int var, int numbersplit) throws ContradictionException {
         VecInt result = new VecInt();
-        for (int i = 0; i < numbersplit; i += 1){
-            VecInt vec = new VecInt();
-            vec.push(curid);
-            vec.push(-var);
-            result.push(curid);
-            solver.addExactly(vec,1);
-            curid += 1;
+        if (!splitmap.containsKey(var)){
+            splitmap.put(var,new ArrayList<>());
+        }
+        if (splitmap.get(var).size() < numbersplit){
+            while (numbersplit > splitmap.get(var).size()){
+                splitmap.get(var).add(curid);
+                VecInt vec = new VecInt();
+                vec.push(curid);
+                vec.push(-var);
+                solver.addExactly(vec,1);
+                curid += 1;
+            }
+        }
+        for (int i = 0; i < numbersplit; i += 1) {
+            result.push(splitmap.get(var).get(i));
         }
         return result;
     }
