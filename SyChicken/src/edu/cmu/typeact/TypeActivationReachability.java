@@ -1,15 +1,11 @@
 package edu.cmu.typeact;
 
 import edu.cmu.parser.MethodSignature;
-import org.python.antlr.ast.Str;
-import org.sat4j.core.ConstrGroup;
 import org.sat4j.core.VecInt;
 import org.sat4j.minisat.SolverFactory;
 import org.sat4j.specs.ContradictionException;
-import org.sat4j.specs.IConstr;
 import org.sat4j.specs.ISolver;
 import org.sat4j.specs.TimeoutException;
-import soot.Type;
 
 import java.util.*;
 
