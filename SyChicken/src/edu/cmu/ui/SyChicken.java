@@ -18,14 +18,9 @@ public class SyChicken {
 	    //Command line arguments
         List<String> arglist = Arrays.asList(args);
         String jsonPath;
-        BufferedWriter out = null;
         // 0. Read input from the user
         SyMonsterInput jsonInput;
         jsonInput = JsonParser.parseJsonInput(args[0]);
-        String outputPath = args[1];
-        File outfile = new File(outputPath);
-        if (!outfile.exists()) outfile.createNewFile();
-        out = new BufferedWriter(new FileWriter(outfile));
         boolean equiv = args.length > 1 && args[1].equals("-e");
         // 1. Read config
         SymonsterConfig jsonConfig = JsonParser.parseJsonConfig("config/config.json");
@@ -93,7 +88,7 @@ public class SyChicken {
             TimerUtils.stopTimer("set");
             if (set == null){
                 curlen += 1;
-                System.out.println("Curlen: "+curlen);
+                System.out.println("Searching program length "+curlen);
                 TimerUtils.startTimer("constraints");
                 tar = new TypeActivationReachability(sigs,inputCounts,jsonInput.tgtType,superclassMap,curlen);
                 TimerUtils.stopTimer("constraints");
@@ -131,20 +126,19 @@ public class SyChicken {
                             TimerUtils.stopTimer("compile");
                             programs ++;
                             if (compre) {
-                                writeLog(out,"Options:\n");
-                                writeLog(out,"Programs explored = " + programs+"\n");
-                                writeLog(out,"Sets explored = " + sets+"\n");
-                                writeLog(out,"Valid Sets explored = " + validsets+"\n");
-                                writeLog(out,"Paths explored = " + paths+"\n");
-                                writeLog(out,"code:\n");
-                                writeLog(out,code+"\n");
-                                writeLog(out,"Soot time: "+TimerUtils.getCumulativeTime("soot")+"\n");
-                                writeLog(out,"Equivalent program preprocess time: "+TimerUtils.getCumulativeTime("equiv")+"\n");
-                                writeLog(out,"Form code time: "+TimerUtils.getCumulativeTime("code")+"\n");
-                                writeLog(out,"Set finding time: "+TimerUtils.getCumulativeTime("set")+"\n");
-                                writeLog(out,"Compilation time: "+TimerUtils.getCumulativeTime("compile")+"\n");
-                                writeLog(out,"Constraint time: "+TimerUtils.getCumulativeTime("constraints")+"\n");
-                                out.close();
+                                writeLog("Equivalent program activated: " + equiv + "\n" );
+                                writeLog("Programs explored = " + programs+"\n");
+                                writeLog("Sets explored = " + sets+"\n");
+                                writeLog("Valid Sets explored = " + validsets+"\n");
+                                writeLog("Paths explored = " + paths+"\n");
+                                writeLog("code:\n");
+                                writeLog(code+"\n");
+                                writeLog("Soot time: "+TimerUtils.getCumulativeTime("soot")+"\n");
+                                writeLog("Equivalent program preprocess time: "+TimerUtils.getCumulativeTime("equiv")+"\n");
+                                writeLog("Form code time: "+TimerUtils.getCumulativeTime("code")+"\n");
+                                writeLog("Set finding time: "+TimerUtils.getCumulativeTime("set")+"\n");
+                                writeLog("Compilation time: "+TimerUtils.getCumulativeTime("compile")+"\n");
+                                writeLog("Constraint time: "+TimerUtils.getCumulativeTime("constraints")+"\n");
 
                                 File compfile = new File("build/Target.class");
                                 compfile.delete();
@@ -157,12 +151,7 @@ public class SyChicken {
         }
 	}
 
-	private static void writeLog(BufferedWriter out,String string){
-        try {
-            System.out.println(string);
-            out.write(string);
-        } catch (IOException e) {
-            System.exit(1);
-        }
+	private static void writeLog(String string){
+        System.out.println(string);
     }
 }
