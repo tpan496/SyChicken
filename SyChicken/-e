@@ -1,0 +1,20 @@
+Options:
+Programs explored = 155
+Sets explored = 78
+Valid Sets explored = 73
+Paths explored = 1006
+code:
+public cmu.symonster.Point convert(cmu.symonster.MyPoint sypet_arg0) throws Throwable{
+cmu.symonster.Point var_0 =  new cmu.symonster.Point();
+int var_1 = sypet_arg0.getY();
+var_0.setY(var_1);
+int var_2 = sypet_arg0.getX();
+var_0.setX(var_2);
+return var_0;
+}
+Soot time: 1.132
+Equivalent program preprocess time: 0.005
+Form code time: 0.039
+Set finding time: 0.057
+Compilation time: 5.303
+Constraint time: 0.029

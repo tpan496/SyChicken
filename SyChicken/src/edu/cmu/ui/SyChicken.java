@@ -107,8 +107,10 @@ public class SyChicken {
                 sets += 1;
                 paths += allseq.size();
                 for (List<MethodSignature> signatures : allseq){
-                    if (!repeated.contains(signatures)){
-                        repeated.addAll(dependencyMap.findAllTopSorts(signatures));
+                    if (!equiv || !repeated.contains(signatures)){
+                        if (equiv){
+                            repeated.addAll(dependencyMap.findAllTopSorts(signatures));
+                        }
                         boolean sat = true;
                         CodeFormer former = new CodeFormer(signatures,inputs,retType, varNames, methodName,subclassMap, superclassMap);
                         while (sat){
