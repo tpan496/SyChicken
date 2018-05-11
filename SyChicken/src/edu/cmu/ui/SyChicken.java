@@ -13,7 +13,7 @@ import uniol.apt.adt.pn.PetriNet;
 import java.io.*;
 import java.util.*;
 
-public class SyMonster {
+public class SyChicken {
 	public static void main(String[] args) throws IOException, TimeoutException, ContradictionException {
 	    //Command line arguments
         List<String> arglist = Arrays.asList(args);
@@ -21,20 +21,12 @@ public class SyMonster {
         BufferedWriter out = null;
         // 0. Read input from the user
         SyMonsterInput jsonInput;
-        if (args.length == 0) {
-            System.out.println("Please use the program args next time.");
-            jsonInput = JsonParser.parseJsonInput("benchmarks/math/2/benchmark2.json");
-            File outfile = new File("benchmarks/thing.txt");
-            out = new BufferedWriter(new FileWriter(outfile));
-        }
-        else{
-            jsonInput = JsonParser.parseJsonInput(args[0]);
-            String outputPath = args[1];
-            File outfile = new File(outputPath);
-            if (!outfile.exists()) outfile.createNewFile();
-            out = new BufferedWriter(new FileWriter(outfile));
-        }
-
+        jsonInput = JsonParser.parseJsonInput(args[0]);
+        String outputPath = args[1];
+        File outfile = new File(outputPath);
+        if (!outfile.exists()) outfile.createNewFile();
+        out = new BufferedWriter(new FileWriter(outfile));
+        boolean equiv = args.length > 1 && args[1].equals("-e");
         // 1. Read config
         SymonsterConfig jsonConfig = JsonParser.parseJsonConfig("config/config.json");
         Set<String> acceptableSuperClasses = new HashSet<>();
