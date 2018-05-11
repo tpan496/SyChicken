@@ -68,6 +68,7 @@ public class TypeActivationReachability {
         } catch (ContradictionException e) {
             solver = null;
         }
+        System.out.println("nconst: " + solver.nConstraints());
     }
 
     private void allConstraints(int len) throws ContradictionException {

@@ -23,7 +23,7 @@ public class SyMonster {
         SyMonsterInput jsonInput;
         if (args.length == 0) {
             System.out.println("Please use the program args next time.");
-            jsonInput = JsonParser.parseJsonInput("benchmarks/math/1/benchmark1.json");
+            jsonInput = JsonParser.parseJsonInput("benchmarks/math/2/benchmark2.json");
             File outfile = new File("benchmarks/thing.txt");
             out = new BufferedWriter(new FileWriter(outfile));
         }
@@ -108,50 +108,54 @@ public class SyMonster {
             }
             else{
                 List<List<MethodSignature>> allseq = generator.generate(set,new HashMap<>(inputCounts));
+                Set<List<MethodSignature>> repeated = new HashSet<>();
                 if (allseq.size() > 0){
                     validsets += 1;
                 }
                 sets += 1;
                 paths += allseq.size();
                 for (List<MethodSignature> signatures : allseq){
-                    boolean sat = true;
-                    CodeFormer former = new CodeFormer(signatures,inputs,retType, varNames, methodName,subclassMap, superclassMap);
-                    while (sat){
-                        TimerUtils.startTimer("code");
-                        String code;
-                        try {
-                            code = former.solve();
-                        } catch (TimeoutException e) {
-                            sat = false;
-                            break;
-                        }
-                        sat = !former.isUnsat();
-                        TimerUtils.stopTimer("code");
-                        // 6. Run the test cases
-                        // TODO: write this code; if all test cases pass then we can terminate
-                        TimerUtils.startTimer("compile");
-                        boolean compre = Test.runTest(code,testCode);
-                        TimerUtils.stopTimer("compile");
-                        programs ++;
-                        if (compre) {
-                            writeLog(out,"Options:\n");
-                            writeLog(out,"Programs explored = " + programs+"\n");
-                            writeLog(out,"Sets explored = " + sets+"\n");
-                            writeLog(out,"Valid Sets explored = " + validsets+"\n");
-                            writeLog(out,"Paths explored = " + paths+"\n");
-                            writeLog(out,"code:\n");
-                            writeLog(out,code+"\n");
-                            writeLog(out,"Soot time: "+TimerUtils.getCumulativeTime("soot")+"\n");
-                            writeLog(out,"Equivalent program preprocess time: "+TimerUtils.getCumulativeTime("equiv")+"\n");
-                            writeLog(out,"Form code time: "+TimerUtils.getCumulativeTime("code")+"\n");
-                            writeLog(out,"Set finding time: "+TimerUtils.getCumulativeTime("set")+"\n");
-                            writeLog(out,"Compilation time: "+TimerUtils.getCumulativeTime("compile")+"\n");
-                            writeLog(out,"Constraint time: "+TimerUtils.getCumulativeTime("constraints")+"\n");
-                            out.close();
+                    if (!repeated.contains(signatures)){
+                        repeated.addAll(dependencyMap.findAllTopSorts(signatures));
+                        boolean sat = true;
+                        CodeFormer former = new CodeFormer(signatures,inputs,retType, varNames, methodName,subclassMap, superclassMap);
+                        while (sat){
+                            TimerUtils.startTimer("code");
+                            String code;
+                            try {
+                                code = former.solve();
+                            } catch (TimeoutException e) {
+                                sat = false;
+                                break;
+                            }
+                            sat = !former.isUnsat();
+                            TimerUtils.stopTimer("code");
+                            // 6. Run the test cases
+                            // TODO: write this code; if all test cases pass then we can terminate
+                            TimerUtils.startTimer("compile");
+                            boolean compre = Test.runTest(code,testCode);
+                            TimerUtils.stopTimer("compile");
+                            programs ++;
+                            if (compre) {
+                                writeLog(out,"Options:\n");
+                                writeLog(out,"Programs explored = " + programs+"\n");
+                                writeLog(out,"Sets explored = " + sets+"\n");
+                                writeLog(out,"Valid Sets explored = " + validsets+"\n");
+                                writeLog(out,"Paths explored = " + paths+"\n");
+                                writeLog(out,"code:\n");
+                                writeLog(out,code+"\n");
+                                writeLog(out,"Soot time: "+TimerUtils.getCumulativeTime("soot")+"\n");
+                                writeLog(out,"Equivalent program preprocess time: "+TimerUtils.getCumulativeTime("equiv")+"\n");
+                                writeLog(out,"Form code time: "+TimerUtils.getCumulativeTime("code")+"\n");
+                                writeLog(out,"Set finding time: "+TimerUtils.getCumulativeTime("set")+"\n");
+                                writeLog(out,"Compilation time: "+TimerUtils.getCumulativeTime("compile")+"\n");
+                                writeLog(out,"Constraint time: "+TimerUtils.getCumulativeTime("constraints")+"\n");
+                                out.close();
 
-                            File compfile = new File("build/Target.class");
-                            compfile.delete();
-                            System.exit(0);
+                                File compfile = new File("build/Target.class");
+                                compfile.delete();
+                                System.exit(0);
+                            }
                         }
                     }
                 }
